@@ -20,6 +20,21 @@ Java 25, Spring Boot 4.1.1 (Web MVC, Data JPA), PostgreSQL, Maven.
    Jadval `flights` avtomatik yaratiladi (`ddl-auto=update`).
 4. Test ma'lumotlar: `sql/seed.sql` ni pgAdmin yoki psql da bajaring.
 
+## Frontend
+React + Vite asosidagi boshqaruv panelini ishga tushirish uchun backend alohida terminalda
+ishlab turgan bo‘lsin. Frontend `/api` so‘rovlarini `http://localhost:8080` ga yo‘naltiradi.
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Vite ko‘rsatgan manzilni oching (odatda `http://localhost:5173`). Backend boshqa portda
+ishlasa, frontendni `API_PROXY_TARGET` bilan ishga tushiring:
+```bash
+API_PROXY_TARGET=http://localhost:8081 npm run dev
+```
+Windows PowerShell’da: `$env:API_PROXY_TARGET="http://localhost:8081"; npm run dev`.
+
 ## Loyiha tuzilmasi
 ```
 aviacomp
@@ -29,6 +44,8 @@ aviacomp
  ├── controller  FlightController
  ├── dto         FlightStats
  └── exception   FlightNotFoundException, GlobalExceptionHandler
+frontend
+ └── React + Vite boshqaruv paneli
 ```
 
 ## Endpointlar
@@ -38,6 +55,24 @@ aviacomp
 | GET | `/api/flights` | Barcha reyslar | 200 OK |
 | GET | `/api/flights/{id}` | Bitta reys | 200 OK / 404 Not Found |
 | GET | `/api/flights/stats` | Reyslar statistikasi | 200 OK |
+| GET | `/api/dashboard/stats` | Reys, mijoz, chipta va tushum ko‘rsatkichlari | 200 OK |
+| GET, POST | `/api/customers` | Mijozlarni ko‘rish va yaratish | 200 / 201 |
+| GET, PUT, DELETE | `/api/customers/{id}` | Mijozni ko‘rish, tahrirlash va xavfsiz o‘chirish | 200 / 204 |
+| GET, POST | `/api/tickets` | Chiptalarni ko‘rish va rasmiylashtirish | 200 / 201 |
+| POST | `/api/tickets/{id}/cancel` | Chiptani bekor qilish | 200 |
+| GET, POST | `/api/payments` | Ichki to‘lov qaydlarini ko‘rish va yaratish | 200 / 201 |
+| PUT | `/api/payments/{id}/status` | To‘lovni tasdiqlash yoki qaytarish | 200 |
+
+Chipta yaratishda mijoz va faol reys tanlanadi, reysdagi bo‘sh o‘rin tekshiriladi
+va chipta narxi reysdan olinadi. Har bir chiptaga bitta ichki to‘lov yozuvi biriktiriladi.
+To‘lov usullari `CASH`, `CARD`, `TRANSFER`; holatlar `PENDING`, `PAID`, `REFUNDED`.
+Bu modul to‘lov holatlarini qayd etadi, karta yoki bankdan haqiqiy pul yechmaydi.
+Bekor qilingan chipta mijozlar bilan bog‘liq tarixni saqlash uchun o‘chirib tashlash
+o‘rniga holati o‘zgartiriladi; to‘langan chipta bekor qilinsa, to‘lov `REFUNDED` bo‘ladi.
+
+Frontend boshqaruv panelida reyslar, mijozlar, chiptalar va ichki to‘lovlar bo‘limlari
+ishlaydi; tahlillar umumiy ko‘rsatkichlarni ko‘rsatadi. Sozlamalar bo‘limida backend
+va API ulanishi holati aks etadi.
 
 ### So'rov namunasi (POST)
 ```json
